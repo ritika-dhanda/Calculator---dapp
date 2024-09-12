@@ -25,7 +25,7 @@ It also prompts users to connect their MetaMask wallet, displaying the connected
 1. **Install MetaMask**: Ensure you have MetaMask installed in your browser. You can download it [here](https://metamask.io/).
 2. **Clone the Repository**:
    ```bash
-   git clone https://github.com/your-username/calculator-dapp.git
+   git clone https://github.com/ritika-dhanda/Calculator---dapp.git
    cd calculator-dapp
    ```
 3. **Open `index.html`**: You can either open the file in your browser or use a local server to view the project.
@@ -63,4 +63,4 @@ This project is licensed under the MIT License.
 
 ## Author
 - **Ritika Dhanda**
-- GitHub: [@your-username](https://github.com/your-username)
+
